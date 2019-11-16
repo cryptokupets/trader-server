@@ -1,8 +1,8 @@
-import { streamTrades } from "backtesting";
 import es from "event-stream";
 import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
+import { streamTradesBacktest as streamTrades } from "trader-service";
 import connect from "../connect";
 import { Backtest } from "../models/Backtest";
 import { Trade } from "../models/Trade";

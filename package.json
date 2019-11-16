@@ -40,14 +40,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "backtesting": "^1.0.0-alpha.0",
     "event-stream": "^4.0.1",
     "moment": "^2.24.0",
     "mongodb": "^3.3.2",
     "odata-v4-mongodb": "^0.1.12",
     "odata-v4-server": "^0.2.13",
-    "paper-trade": "^1.0.0-alpha",
-    "patch-package": "^6.1.2"
+    "patch-package": "^6.1.2",
+    "trader-service": "^1.0.0-alpha"
   },
   "devDependencies": {
     "@types/event-stream": "^3.3.34",
