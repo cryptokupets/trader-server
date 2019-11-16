@@ -1,0 +1,35 @@
+diff --git a/node_modules/odata-v4-server/build/lib/processor.d.ts b/node_modules/odata-v4-server/build/lib/processor.d.ts
+index b033158..6323976 100644
+--- a/node_modules/odata-v4-server/build/lib/processor.d.ts
++++ b/node_modules/odata-v4-server/build/lib/processor.d.ts
+@@ -42,7 +42,7 @@ export declare class ODataProcessor extends Transform {
+     private resultCount;
+     constructor(context: any, server: any, options?: ODataProcessorOptions);
+     _transform(chunk: any, _: string, done: Function): any;
+-    protected _flush(done?: Function): void;
++    public _flush(done?: Function): void;
+     private __qualifiedTypeName;
+     private __EntityCollectionNavigationProperty;
+     private __EntityNavigationProperty;
+diff --git a/node_modules/odata-v4-server/src/lib/processor.ts b/node_modules/odata-v4-server/src/lib/processor.ts
+index 422d2f0..3ae448e 100644
+--- a/node_modules/odata-v4-server/src/lib/processor.ts
++++ b/node_modules/odata-v4-server/src/lib/processor.ts
+@@ -395,7 +395,7 @@ class ODataStreamWrapper extends Transform {
+         if (typeof done == "function") done();
+     }
+ 
+-    protected _flush(done?: Function) {
++    public _flush(done?: Function) {
+         if (typeof done == "function") done();
+     }
+ 
+@@ -581,7 +581,7 @@ export class ODataProcessor extends Transform {
+         }
+     }
+ 
+-    protected _flush(done?: Function) {
++    public _flush(done?: Function) {
+         if (this.streamEnabled && this.streamObject) {
+             if (this.options.objectMode) {
+                 let flushObject: any = {
