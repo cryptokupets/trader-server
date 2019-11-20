@@ -182,6 +182,15 @@ export class SessionController extends ODataController {
       .then(result => result.deletedCount);
   }
 
+  @odata.GET("Buffer")
+  public async getBuffer(
+    @odata.result result: Session
+  ): Promise<Buffer[]> {
+    // получить бары и др. статистику, нужна для диаграмм, нельзя обычные, т.к. придется дергать много раз
+    // кроме того, это можно попробовать хранить в инмемори
+    return [];
+  }
+
   @odata.GET("Trades")
   public async getTrades(
     @odata.result result: Session,

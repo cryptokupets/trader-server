@@ -11,8 +11,14 @@ export class Trade {
   @Edm.String
   public time: string;
 
+  @Edm.String
+  public side: number;
+
   @Edm.Double
   public quantity: number;
+
+  @Edm.Double
+  public price: number;
 
   @Edm.Double
   public amount: number;
