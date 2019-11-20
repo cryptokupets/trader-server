@@ -1,6 +1,6 @@
 {
   "name": "trader-server",
-  "version": "1.0.0-alpha",
+  "version": "1.0.1-alpha",
   "description": "OData server for testing strategies, simulating and real trading.",
   "repository": {
     "type": "git",
@@ -45,7 +45,7 @@
     "mongodb": "^3.3.2",
     "odata-v4-mongodb": "^0.1.12",
     "odata-v4-server": "^0.2.13",
-    "patch-package": "^6.1.2",
+    "patch-package": "^6.2.0",
     "trader-service": "^1.0.0-alpha"
   },
   "devDependencies": {

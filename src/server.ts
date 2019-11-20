@@ -1,9 +1,7 @@
 import { odata, ODataServer } from "odata-v4-server";
-import { BacktestController } from "./controllers/Backtest";
-import { PaperTradeController } from "./controllers/PaperTrade";
+import { SessionController } from "./controllers/Session";
 
 @odata.cors
 @odata.namespace("Trader")
-@odata.controller(BacktestController, true)
-@odata.controller(PaperTradeController, true)
+@odata.controller(SessionController, true)
 export class TraderServer extends ODataServer {}

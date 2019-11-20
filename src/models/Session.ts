@@ -1,13 +1,18 @@
 import { ObjectID } from "mongodb";
-import { Edm } from "odata-v4-server";
+import { Edm, odata } from "odata-v4-server";
 import { Trade } from "./Trade";
 
-export class Backtest {
+export class Session {
+  public static streams: any = {};
+
   @Edm.Key
   @Edm.Computed
   @Edm.String
   // tslint:disable-next-line: variable-name
   public _id: ObjectID;
+
+  @Edm.Boolean
+  public backtest: boolean;
 
   @Edm.String
   public exchange: string;
@@ -39,10 +44,21 @@ export class Backtest {
   @Edm.Double
   public finalBalance: number;
 
+  @Edm.Double
+  public profit: number;
+
   @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Trade)))
   public Trades: Trade[];
 
   constructor(data: any) {
     Object.assign(this, data);
+  }
+
+  @Edm.Action
+  public stop(@odata.result result: any) {
+    const { key } = result;
+    if (Session.streams[key]) {
+      Session.streams[key].destroy();
+    }
   }
 }
