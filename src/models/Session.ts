@@ -1,6 +1,5 @@
 import { ObjectID } from "mongodb";
 import { Edm, odata } from "odata-v4-server";
-import { Buffer } from "./Buffer";
 import { Trade } from "./Trade";
 
 export class Session {
@@ -47,9 +46,6 @@ export class Session {
 
   @Edm.Double
   public profit: number;
-
-  @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Buffer)))
-  public Buffer: Buffer[];
 
   @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Trade)))
   public Trades: Trade[];
