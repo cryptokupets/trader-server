@@ -66,21 +66,13 @@ export class SessionController extends ODataController {
   ): Promise<Session> {
     const session = new Session(body);
 
-    if (!session.begin) {
-      session.begin = moment()
-        .utc()
-        .toISOString();
-    }
-
-    session.backtest = !!session.end;
-
     const db = await connect();
     const collection = await db.collection(collectionName);
     session._id = (await collection.insertOne(session)).insertedId;
 
     const {
       _id,
-      backtest,
+      type,
       asset,
       currency,
       exchange,
@@ -92,7 +84,7 @@ export class SessionController extends ODataController {
       initialBalance
     } = session;
 
-    if (backtest) {
+    if (type === "backtest") {
       const rs = streamTradesBacktest({
         exchange,
         currency,
@@ -134,13 +126,15 @@ export class SessionController extends ODataController {
           }
         }
       );
-    } else {
+    } else if (type === "paper") {
       const stream = streamTradesPaper({
         exchange,
         currency,
         asset,
         period: "" + period,
-        start: begin,
+        start: moment()
+          .utc()
+          .toISOString(),
         indicators: JSON.parse(indicators),
         code,
         initialBalance
@@ -180,15 +174,6 @@ export class SessionController extends ODataController {
       .collection(collectionName)
       .deleteOne({ _id })
       .then(result => result.deletedCount);
-  }
-
-  @odata.GET("Buffer")
-  public async getBuffer(
-    @odata.result result: Session
-  ): Promise<Buffer[]> {
-    // получить бары и др. статистику, нужна для диаграмм, нельзя обычные, т.к. придется дергать много раз
-    // кроме того, это можно попробовать хранить в инмемори
-    return [];
   }
 
   @odata.GET("Trades")

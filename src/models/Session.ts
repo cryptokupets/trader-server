@@ -11,8 +11,8 @@ export class Session {
   // tslint:disable-next-line: variable-name
   public _id: ObjectID;
 
-  @Edm.Boolean
-  public backtest: boolean;
+  @Edm.String
+  public type: string; // "backtest"|"paper"|""
 
   @Edm.String
   public exchange: string;
