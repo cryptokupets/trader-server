@@ -1,12 +1,35 @@
 import es from "event-stream";
+import { streamBuffer } from "get-advice";
 import moment from "moment";
 import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import { streamTradesBacktest, streamTradesPaper } from "trader-service";
 import connect from "../connect";
+import { Chart } from "../models/Chart";
+import { Series } from "../models/Series";
+import { SeriesItem } from "../models/SeriesItem";
 import { Session } from "../models/Session";
 import { Trade } from "../models/Trade";
+
+interface ICandle {
+  time: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+interface IIndicator {
+  name: string;
+  options: number[];
+}
+
+interface IBuffer {
+  candle: ICandle;
+  indicators: number[][];
+}
 
 const collectionName = "session";
 
@@ -202,5 +225,77 @@ export class SessionController extends ODataController {
         .count(false);
     }
     return trades;
+  }
+
+  @odata.GET("Charts")
+  public async getCharts(@odata.result result: Session): Promise<Chart[]> {
+    // tslint:disable-next-line: variable-name
+    const _id = new ObjectID(result._id);
+    const db = await connect();
+    const {
+      exchange,
+      currency,
+      asset,
+      period,
+      begin,
+      end,
+      indicators
+    }: {
+      exchange: string;
+      currency: string;
+      asset: string;
+      period: number;
+      begin?: string;
+      end?: string;
+      indicators: string;
+    } = await db.collection(collectionName).findOne({ _id });
+
+    const charts: Chart[] = [
+      new Chart({
+        sessionId: _id,
+        index: 0,
+        Series: [
+          new Series({
+            sessionId: _id,
+            chartIndex: 0,
+            index: 0,
+            Items: []
+          })
+        ]
+      })
+    ];
+
+    const parsedIndicators: IIndicator[] = JSON.parse(indicators);
+
+    const rs = streamBuffer({
+      exchange,
+      currency,
+      asset,
+      period,
+      start: begin,
+      end,
+      indicators: parsedIndicators
+    });
+
+    rs.pipe(
+      es.map((chunk: string, next: () => void) => {
+        const buffer = JSON.parse(chunk) as IBuffer;
+        const candle: ICandle = buffer.candle;
+        charts[0].Series[0].Items.push(
+          new SeriesItem({
+            time: candle.time,
+            values: [candle.open, candle.high, candle.low, candle.close]
+          })
+        );
+        // UNDONE сделать диаграммы для индикаторов
+        next();
+      })
+    );
+
+    return new Promise(resolve => {
+      rs.on("end", () => {
+        resolve(charts);
+      });
+    });
   }
 }

@@ -1,5 +1,6 @@
 import { ObjectID } from "mongodb";
 import { Edm, odata } from "odata-v4-server";
+import { Chart } from "./Chart";
 import { Trade } from "./Trade";
 
 export class Session {
@@ -49,6 +50,9 @@ export class Session {
 
   @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Trade)))
   public Trades: Trade[];
+
+  @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Chart)))
+  public Charts: Chart[];
 
   constructor(data: any) {
     Object.assign(this, data);
