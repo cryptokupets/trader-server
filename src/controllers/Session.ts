@@ -253,22 +253,7 @@ export class SessionController extends ODataController {
     } = await db.collection(collectionName).findOne({ _id });
 
     const candles: Candle[] = [];
-
-    // const indicatorCharts: Chart[] = [
-    //   new Chart({
-    //     sessionId: _id,
-    //     index: 0,
-    //     Series: [
-    //       new Series({
-    //         sessionId: _id,
-    //         chartIndex: 0,
-    //         index: 0,
-    //         Items: []
-    //       })
-    //     ]
-    //   })
-    // ];
-
+    const indicatorCharts: Chart[] = [];
     const parsedIndicators: IIndicator[] = JSON.parse(indicators);
 
     const rs = streamBuffer({
@@ -284,6 +269,8 @@ export class SessionController extends ODataController {
     rs.pipe(
       es.map((chunk: string, next: () => void) => {
         const buffer = JSON.parse(chunk) as IBuffer;
+
+        // Candles
         const {
           time,
           open,
@@ -292,6 +279,7 @@ export class SessionController extends ODataController {
           close,
           volume
         } = buffer.candle as ICandle;
+
         candles.push(
           new Candle({
             time,
@@ -302,7 +290,37 @@ export class SessionController extends ODataController {
             volume
           })
         );
-        // UNDONE сделать диаграммы для индикаторов
+
+        // Indicators
+        buffer.indicators.forEach((value0, index0) => {
+          // добавить недостающие диаграммы
+          if (indicatorCharts.length === index0) {
+            indicatorCharts.push(
+              new Chart({
+                Series: []
+              })
+            );
+          }
+          value0.forEach((value1, index1) => {
+            // добавить недостающие серии
+            const series = indicatorCharts[index0].Series;
+            if (series.length === index1) {
+              series.push(
+                new Series({
+                  Items: []
+                })
+              );
+            }
+            // добавить индикаторы
+            series[index1].Items.push(
+              new SeriesItem({
+                time,
+                value: value1
+              })
+            );
+          });
+        });
+
         next();
       })
     );
@@ -312,7 +330,7 @@ export class SessionController extends ODataController {
         resolve(
           new View({
             Candles: candles,
-            Indicators: []
+            Indicators: indicatorCharts
           })
         );
       });

@@ -5,7 +5,7 @@ export class SeriesItem {
   public time: string;
 
   @Edm.Double
-  public values: number[];
+  public value: number;
 
   constructor(data: any) {
     Object.assign(this, data);

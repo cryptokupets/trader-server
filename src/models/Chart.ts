@@ -1,4 +1,3 @@
-import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
 import { Series } from "./Series";
 
