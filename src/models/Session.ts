@@ -1,7 +1,7 @@
 import { ObjectID } from "mongodb";
 import { Edm, odata } from "odata-v4-server";
-import { Chart } from "./Chart";
 import { Trade } from "./Trade";
+import { View } from "./View";
 
 export class Session {
   public static streams: any = {};
@@ -51,8 +51,8 @@ export class Session {
   @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Trade)))
   public Trades: Trade[];
 
-  @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Chart)))
-  public Charts: Chart[];
+  @Edm.EntityType(Edm.ForwardRef(() => View))
+  public View: View;
 
   constructor(data: any) {
     Object.assign(this, data);

@@ -6,11 +6,13 @@ import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import { streamTradesBacktest, streamTradesPaper } from "trader-service";
 import connect from "../connect";
+import { Candle } from "../models/Candle";
 import { Chart } from "../models/Chart";
 import { Series } from "../models/Series";
 import { SeriesItem } from "../models/SeriesItem";
 import { Session } from "../models/Session";
 import { Trade } from "../models/Trade";
+import { View } from "../models/View";
 
 interface ICandle {
   time: string;
@@ -227,8 +229,8 @@ export class SessionController extends ODataController {
     return trades;
   }
 
-  @odata.GET("Charts")
-  public async getCharts(@odata.result result: Session): Promise<Chart[]> {
+  @odata.GET("View")
+  public async getView(@odata.result result: Session): Promise<View> {
     // tslint:disable-next-line: variable-name
     const _id = new ObjectID(result._id);
     const db = await connect();
@@ -250,20 +252,22 @@ export class SessionController extends ODataController {
       indicators: string;
     } = await db.collection(collectionName).findOne({ _id });
 
-    const charts: Chart[] = [
-      new Chart({
-        sessionId: _id,
-        index: 0,
-        Series: [
-          new Series({
-            sessionId: _id,
-            chartIndex: 0,
-            index: 0,
-            Items: []
-          })
-        ]
-      })
-    ];
+    const candles: Candle[] = [];
+
+    // const indicatorCharts: Chart[] = [
+    //   new Chart({
+    //     sessionId: _id,
+    //     index: 0,
+    //     Series: [
+    //       new Series({
+    //         sessionId: _id,
+    //         chartIndex: 0,
+    //         index: 0,
+    //         Items: []
+    //       })
+    //     ]
+    //   })
+    // ];
 
     const parsedIndicators: IIndicator[] = JSON.parse(indicators);
 
@@ -280,11 +284,22 @@ export class SessionController extends ODataController {
     rs.pipe(
       es.map((chunk: string, next: () => void) => {
         const buffer = JSON.parse(chunk) as IBuffer;
-        const candle: ICandle = buffer.candle;
-        charts[0].Series[0].Items.push(
-          new SeriesItem({
-            time: candle.time,
-            values: [candle.open, candle.high, candle.low, candle.close]
+        const {
+          time,
+          open,
+          high,
+          low,
+          close,
+          volume
+        } = buffer.candle as ICandle;
+        candles.push(
+          new Candle({
+            time,
+            open,
+            high,
+            low,
+            close,
+            volume
           })
         );
         // UNDONE сделать диаграммы для индикаторов
@@ -294,7 +309,12 @@ export class SessionController extends ODataController {
 
     return new Promise(resolve => {
       rs.on("end", () => {
-        resolve(charts);
+        resolve(
+          new View({
+            Candles: candles,
+            Indicators: []
+          })
+        );
       });
     });
   }
