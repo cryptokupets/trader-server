@@ -6,8 +6,10 @@ import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import { streamTradesBacktest, streamTradesPaper } from "trader-service";
 import connect from "../connect";
+import { BufferItem } from "../models/BufferItem";
 import { Candle } from "../models/Candle";
 import { Chart } from "../models/Chart";
+import { Indicator } from "../models/Indicator";
 import { Series } from "../models/Series";
 import { SeriesItem } from "../models/SeriesItem";
 import { Session } from "../models/Session";
@@ -227,6 +229,81 @@ export class SessionController extends ODataController {
         .count(false);
     }
     return trades;
+  }
+
+  @odata.GET("Buffer")
+  public async getBuffer(@odata.result result: Session): Promise<BufferItem[]> {
+    // tslint:disable-next-line: variable-name
+    const _id = new ObjectID(result._id);
+    const db = await connect();
+    const {
+      exchange,
+      currency,
+      asset,
+      period,
+      begin,
+      end,
+      indicators
+    }: {
+      exchange: string;
+      currency: string;
+      asset: string;
+      period: number;
+      begin?: string;
+      end?: string;
+      indicators: string;
+    } = await db.collection(collectionName).findOne({ _id });
+
+    const candles: Candle[] = [];
+    const bufferItems: BufferItem[] = [];
+    const indicatorCharts: Chart[] = [];
+    const parsedIndicators: IIndicator[] = JSON.parse(indicators);
+
+    const rs = streamBuffer({
+      exchange,
+      currency,
+      asset,
+      period,
+      start: begin,
+      end,
+      indicators: parsedIndicators
+    });
+
+    rs.pipe(
+      es.map((chunk: string, next: () => void) => {
+        const buffer = JSON.parse(chunk) as IBuffer;
+
+        // Candles
+        const {
+          time,
+          open,
+          high,
+          low,
+          close,
+          volume
+        } = buffer.candle as ICandle;
+
+        bufferItems.push(new BufferItem({
+          Candle: new Candle({
+            time,
+            open,
+            high,
+            low,
+            close,
+            volume
+          }),
+          Indicators: buffer.indicators.map(values => new Indicator({
+            values
+          }))
+        }));
+
+        next();
+      })
+    );
+
+    return new Promise(resolve => {
+      rs.on("end", () => resolve(bufferItems));
+    });
   }
 
   @odata.GET("View")
