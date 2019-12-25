@@ -49,6 +49,9 @@ export class Session {
   @Edm.Double
   public profit: number;
 
+  @Edm.String
+  public status: string; // "active"|"inactive"
+
   @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => BufferItem)))
   public Buffer: BufferItem[];
 
@@ -64,9 +67,10 @@ export class Session {
 
   @Edm.Action
   public stop(@odata.result result: any) {
-    const { key } = result;
-    if (Session.streams[key]) {
-      Session.streams[key].destroy();
+    const { _id } = result;
+    if (Session.streams[_id]) {
+      Session.streams[_id].destroy();
+      delete Session.streams[_id];
     }
   }
 }

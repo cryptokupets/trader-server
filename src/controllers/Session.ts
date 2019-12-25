@@ -59,7 +59,14 @@ export class SessionController extends ODataController {
             .skip(mongodbQuery.skip || 0)
             .limit(mongodbQuery.limit || 0)
             .sort(mongodbQuery.sort)
-            .map(e => new Session(e))
+            .map(
+              e =>
+                new Session(
+                  Object.assign(e, {
+                    status: Session.streams[e._id] ? "active" : "stopped"
+                  })
+                )
+            )
             .toArray();
 
     if (mongodbQuery.inlinecount) {
@@ -81,9 +88,13 @@ export class SessionController extends ODataController {
     // tslint:disable-next-line: variable-name
     const _id = new ObjectID(key);
     const db = await connect();
-    return new Session(
+    const session = new Session(
       await db.collection(collectionName).findOne({ _id }, { projection })
     );
+    session.status = Session.streams[session._id.toHexString()]
+      ? "active"
+      : "inactive";
+    return session;
   }
 
   @odata.POST
@@ -283,19 +294,24 @@ export class SessionController extends ODataController {
           volume
         } = buffer.candle as ICandle;
 
-        bufferItems.push(new BufferItem({
-          Candle: new Candle({
-            time,
-            open,
-            high,
-            low,
-            close,
-            volume
-          }),
-          Indicators: buffer.indicators.map(values => new Indicator({
-            values
-          }))
-        }));
+        bufferItems.push(
+          new BufferItem({
+            Candle: new Candle({
+              time,
+              open,
+              high,
+              low,
+              close,
+              volume
+            }),
+            Indicators: buffer.indicators.map(
+              values =>
+                new Indicator({
+                  values
+                })
+            )
+          })
+        );
 
         next();
       })
