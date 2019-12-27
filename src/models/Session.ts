@@ -1,5 +1,7 @@
+import moment from "moment";
 import { ObjectID } from "mongodb";
 import { Edm, odata } from "odata-v4-server";
+import connect from "../connect";
 import { BufferItem } from "./BufferItem";
 import { Trade } from "./Trade";
 import { View } from "./View";
@@ -66,11 +68,22 @@ export class Session {
   }
 
   @Edm.Action
-  public stop(@odata.result result: any) {
+  public async stop(@odata.result result: any): Promise<void> {
     const { _id } = result;
     if (Session.streams[_id]) {
       Session.streams[_id].destroy();
       delete Session.streams[_id];
     }
+
+    await (await connect()).collection("session").updateOne(
+      { _id: new ObjectID(_id) },
+      {
+        $set: {
+          end: moment()
+            .utc()
+            .toISOString()
+        }
+      }
+    );
   }
 }

@@ -63,7 +63,7 @@ export class SessionController extends ODataController {
               e =>
                 new Session(
                   Object.assign(e, {
-                    status: Session.streams[e._id] ? "active" : "stopped"
+                    status: Session.streams[e._id] ? "active" : "inactive"
                   })
                 )
             )
@@ -102,6 +102,12 @@ export class SessionController extends ODataController {
     @odata.body
     body: any
   ): Promise<Session> {
+    if (!body.begin) {
+      body.begin = moment()
+        .utc()
+        .toISOString();
+    }
+
     const session = new Session(body);
 
     const db = await connect();
@@ -260,14 +266,12 @@ export class SessionController extends ODataController {
       currency: string;
       asset: string;
       period: number;
-      begin?: string;
+      begin: string;
       end?: string;
       indicators: string;
     } = await db.collection(collectionName).findOne({ _id });
 
-    const candles: Candle[] = [];
     const bufferItems: BufferItem[] = [];
-    const indicatorCharts: Chart[] = [];
     const parsedIndicators: IIndicator[] = JSON.parse(indicators);
 
     const rs = streamBuffer({
@@ -276,7 +280,11 @@ export class SessionController extends ODataController {
       asset,
       period,
       start: begin,
-      end,
+      end:
+        end ||
+        moment()
+          .utc()
+          .toISOString(),
       indicators: parsedIndicators
     });
 
@@ -340,7 +348,7 @@ export class SessionController extends ODataController {
       currency: string;
       asset: string;
       period: number;
-      begin?: string;
+      begin: string;
       end?: string;
       indicators: string;
     } = await db.collection(collectionName).findOne({ _id });
@@ -355,7 +363,11 @@ export class SessionController extends ODataController {
       asset,
       period,
       start: begin,
-      end,
+      end:
+        end ||
+        moment()
+          .utc()
+          .toISOString(),
       indicators: parsedIndicators
     });
 

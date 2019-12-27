@@ -1,6 +1,6 @@
 {
   "name": "trader-server",
-  "version": "1.0.8-alpha",
+  "version": "1.0.9-alpha",
   "description": "OData server for testing strategies, simulating and real trading.",
   "repository": {
     "type": "git",
