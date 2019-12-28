@@ -3,7 +3,7 @@ import moment from "moment";
 import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
-import { streamTradesBacktest, streamTradesPaper, streamBuffer } from "trader-service";
+import { streamBuffer, streamTradesBacktest, streamTradesPaper } from "trader-service";
 import connect from "../connect";
 import { BufferItem } from "../models/BufferItem";
 import { Candle } from "../models/Candle";

@@ -1,6 +1,6 @@
 import es from "event-stream";
-import { streamBuffer } from "get-advice";
 import { Edm, odata, ODataServer } from "odata-v4-server";
+import { streamBuffer } from "trader-service";
 import { SessionController } from "./controllers/Session";
 
 interface ICandle {
