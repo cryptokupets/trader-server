@@ -1,6 +1,6 @@
 {
   "name": "trader-server",
-  "version": "1.0.10-alpha",
+  "version": "1.0.11-alpha",
   "description": "OData server for testing strategies, simulating and real trading.",
   "repository": {
     "type": "git",
@@ -41,13 +41,12 @@
   "license": "MIT",
   "dependencies": {
     "event-stream": "^4.0.1",
-    "get-advice": "^1.0.3-alpha",
     "moment": "^2.24.0",
     "mongodb": "^3.3.2",
     "odata-v4-mongodb": "^0.1.12",
     "odata-v4-server": "^0.2.13",
     "patch-package": "^6.2.0",
-    "trader-service": "^1.0.0-alpha"
+    "trader-service": "^1.0.2-alpha"
   },
   "devDependencies": {
     "@types/event-stream": "^3.3.34",
